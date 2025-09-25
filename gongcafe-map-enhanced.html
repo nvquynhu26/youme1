@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>콩카페 매장 위치 지도</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    
+    <!-- Custom CSS -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            border-bottom: 3px solid #8B4513;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #8B4513;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            color: #7f8c8d;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .map-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 3px solid #8B4513;
+        }
+        
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+        
+        .controls {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: 2px solid #ecf0f1;
+        }
+        
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        
+        .control-group input, .control-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Noto Sans KR', sans-serif;
+            box-sizing: border-box;
+        }
+        
+        .control-group input:focus, .control-group select:focus {
+            outline: none;
+            border-color: #8B4513;
+            box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+        }
+        
+        .search-container {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+        }
+        
+        .search-container .control-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .search-btn {
+            background: #8B4513;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            height: fit-content;
+        }
+        
+        .search-btn:hover {
+            background: #A0522D;
+            transform: translateY(-2px);
+        }
+        
+        .search-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 2px solid #ecf0f1;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        
+        .popup-content {
+            min-width: 250px;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        
+        .popup-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #8B4513;
+            padding-bottom: 8px;
+        }
+        
+        .popup-info {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        .popup-info strong {
+            color: #8B4513;
+            font-weight: 600;
+        }
+        
+        .cafe-icon {
+            background: #8B4513;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #c62828;
+            font-weight: 600;
+        }
+        
+        .city-filter {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .city-btn {
+            padding: 8px 12px;
+            border: 2px solid #e1e8ed;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .city-btn:hover {
+            border-color: #8B4513;
+            background: #fff8f0;
+        }
+        
+        .city-btn.active {
+            background: #8B4513;
+            color: white;
+            border-color: #8B4513;
+        }
+        
+        .location-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #8B4513;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            #map {
+                height: 400px;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .city-filter {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            }
+            
+            .search-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>☕ 콩카페 매장 위치 지도</h1>
+        <p>전국 콩카페 매장 위치를 확인하고 검색하세요</p>
+    </div>
+    
+    <div class="container">
+        <div class="controls">
+            <div class="search-container">
+                <div class="control-group">
+                    <label for="searchInput">매장 검색:</label>
+                    <input type="text" id="searchInput" placeholder="매장명, 주소, 도시로 검색...">
+                </div>
+                <div class="control-group">
+                    <label for="locationInput">위치 검색:</label>
+                    <input type="text" id="locationInput" placeholder="도시명 또는 주소 입력...">
+                </div>
+                <button class="search-btn" id="locationSearchBtn">위치 찾기</button>
+            </div>
+            
+            <div class="control-group">
+                <label>도시 필터:</label>
+                <div class="city-filter" id="cityFilter">
+                    <button class="city-btn active" data-city="all">전체</button>
+                </div>
+            </div>
+            
+            <div class="location-info" id="locationInfo" style="display: none;">
+                <strong>현재 위치:</strong> <span id="currentLocation">-</span>
+            </div>
+        </div>
+        
+        <div class="map-container">
+            <div id="map"></div>
+            <div id="loading" class="loading">매장 데이터를 불러오는 중...</div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalStores">0</div>
+                <div class="stat-label">총 매장 수</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="visibleStores">0</div>
+                <div class="stat-label">표시된 매장</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="citiesCount">0</div>
+                <div class="stat-label">도시 수</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    
+    <script>
+        // Global variables
+        let map;
+        let cafeStores = [];
+        let markerGroup = L.layerGroup();
+        let currentFilter = 'all';
+        let currentLocation = null;
+        
+        // Initialize the map
+        const initMap = () => {
+            map = L.map('map').setView([37.56, 126.97], 11); // Korea center
+            
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+            
+            // Add marker group to map
+            map.addLayer(markerGroup);
+        };
+        
+        // Create cafe icon
+        const createCafeIcon = () => {
+            return L.divIcon({
+                className: 'cafe-icon',
+                html: '☕',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+        };
+        
+        // Load cafe stores data
+        const loadCafeStores = () => {
+            // Sample data - in real app, load from JSON file
+            cafeStores = [
+                {"id": 1, "name": "콩카페 연남점", "address": "서울 마포구 성미산로 161-14", "lat": 37.5633, "lng": 126.9235, "city": "서울", "district": "마포구"},
+                {"id": 2, "name": "콩카페 이태원점", "address": "서울 용산구 녹사평대로 168-8", "lat": 37.5345, "lng": 126.9941, "city": "서울", "district": "용산구"},
+                {"id": 3, "name": "콩카페 종로종각점", "address": "서울 종로구 인사동3길 37", "lat": 37.5700, "lng": 126.9842, "city": "서울", "district": "종로구"},
+                {"id": 4, "name": "콩카페 잠실롯데점", "address": "서울 송파구 올림픽로 240, 롯데백화점 B1", "lat": 37.5133, "lng": 127.1021, "city": "서울", "district": "송파구"},
+                {"id": 5, "name": "콩카페 신도림점", "address": "서울 구로구 경인로 662, 디큐브시티 B2", "lat": 37.5082, "lng": 126.8910, "city": "서울", "district": "구로구"},
+                {"id": 6, "name": "콩카페 삼성점", "address": "서울 강남구 테헤란로 517, 삼성동 B1", "lat": 37.5081, "lng": 127.0631, "city": "서울", "district": "강남구"},
+                {"id": 7, "name": "콩카페 현대백화점 판교점", "address": "경기 성남시 분당구 판교역로146번길 20, 현대백화점 B1", "lat": 37.3947, "lng": 127.1119, "city": "성남", "district": "분당구"},
+                {"id": 8, "name": "콩카페 고양점 (팝업)", "address": "경기 고양시 덕양구 고양대로 1955, 1층", "lat": 37.6767, "lng": 126.8267, "city": "고양", "district": "덕양구"},
+                {"id": 9, "name": "콩카페 천안점", "address": "충남 천안시 서북구 불당25로 142 골든프라자 105호,106호", "lat": 36.8040, "lng": 127.1507, "city": "천안", "district": "서북구"}
+            ];
+            
+            // Hide loading message
+            document.getElementById('loading').style.display = 'none';
+            
+            // Initialize map features
+            initializeMapFeatures();
+        };
+        
+        // Initialize map features after data is loaded
+        const initializeMapFeatures = () => {
+            // Add markers to map
+            addMarkers();
+            
+            // Populate city filter
+            populateCityFilter();
+            
+            // Update statistics
+            updateStats();
+            
+            // Fit map to show all markers
+            if (cafeStores.length > 0) {
+                const group = new L.featureGroup(markerGroup.getLayers());
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+        };
+        
+        // Add markers to map
+        const addMarkers = () => {
+            markerGroup.clearLayers();
+            
+            cafeStores.forEach(store => {
+                const marker = L.marker([store.lat, store.lng], {
+                    icon: createCafeIcon()
+                });
+                
+                // Create popup content
+                const popupContent = `
+                    <div class="popup-content">
+                        <div class="popup-title">${store.name}</div>
+                        <div class="popup-info"><strong>주소:</strong> ${store.address}</div>
+                        <div class="popup-info"><strong>도시:</strong> ${store.city}</div>
+                        <div class="popup-info"><strong>구/군:</strong> ${store.district}</div>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                markerGroup.addLayer(marker);
+            });
+        };
+        
+        // Populate city filter
+        const populateCityFilter = () => {
+            const filterContainer = document.getElementById('cityFilter');
+            const cities = [...new Set(cafeStores.map(store => store.city))];
+            
+            cities.forEach(city => {
+                const btn = document.createElement('button');
+                btn.className = 'city-btn';
+                btn.textContent = city;
+                btn.setAttribute('data-city', city);
+                btn.addEventListener('click', () => filterByCity(city));
+                filterContainer.appendChild(btn);
+            });
+        };
+        
+        // Filter markers by city
+        const filterByCity = (city) => {
+            currentFilter = city;
+            
+            // Update active button
+            document.querySelectorAll('.city-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-city="${city}"]`).classList.add('active');
+            
+            // Filter markers
+            markerGroup.clearLayers();
+            
+            const filteredStores = city === 'all' 
+                ? cafeStores 
+                : cafeStores.filter(store => store.city === city);
+            
+            filteredStores.forEach(store => {
+                const marker = L.marker([store.lat, store.lng], {
+                    icon: createCafeIcon()
+                });
+                
+                const popupContent = `
+                    <div class="popup-content">
+                        <div class="popup-title">${store.name}</div>
+                        <div class="popup-info"><strong>주소:</strong> ${store.address}</div>
+                        <div class="popup-info"><strong>도시:</strong> ${store.city}</div>
+                        <div class="popup-info"><strong>구/군:</strong> ${store.district}</div>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                markerGroup.addLayer(marker);
+            });
+            
+            updateStats();
+        };
+        
+        // Search functionality
+        const searchStores = (query) => {
+            const searchTerm = query.toLowerCase();
+            
+            markerGroup.clearLayers();
+            
+            const filteredStores = cafeStores.filter(store => {
+                const matchesSearch = store.name.toLowerCase().includes(searchTerm) ||
+                                    store.address.toLowerCase().includes(searchTerm) ||
+                                    store.city.toLowerCase().includes(searchTerm);
+                
+                const matchesCity = currentFilter === 'all' || store.city === currentFilter;
+                
+                return matchesSearch && matchesCity;
+            });
+            
+            filteredStores.forEach(store => {
+                const marker = L.marker([store.lat, store.lng], {
+                    icon: createCafeIcon()
+                });
+                
+                const popupContent = `
+                    <div class="popup-content">
+                        <div class="popup-title">${store.name}</div>
+                        <div class="popup-info"><strong>주소:</strong> ${store.address}</div>
+                        <div class="popup-info"><strong>도시:</strong> ${store.city}</div>
+                        <div class="popup-info"><strong>구/군:</strong> ${store.district}</div>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                markerGroup.addLayer(marker);
+            });
+            
+            updateStats();
+        };
+        
+        // Location search using geocoding
+        const searchLocation = async (locationQuery) => {
+            if (!locationQuery.trim()) return;
+            
+            const searchBtn = document.getElementById('locationSearchBtn');
+            searchBtn.disabled = true;
+            searchBtn.textContent = '검색 중...';
+            
+            try {
+                // Using OpenStreetMap Nominatim API for geocoding
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationQuery)}&limit=1&countrycodes=kr`);
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    const result = data[0];
+                    const lat = parseFloat(result.lat);
+                    const lng = parseFloat(result.lon);
+                    
+                    // Update map view
+                    map.setView([lat, lng], 13);
+                    
+                    // Add location marker
+                    if (currentLocation) {
+                        map.removeLayer(currentLocation);
+                    }
+                    
+                    currentLocation = L.marker([lat, lng], {
+                        icon: L.divIcon({
+                            className: 'location-marker',
+                            html: '📍',
+                            iconSize: [25, 25],
+                            iconAnchor: [12, 12]
+                        })
+                    }).addTo(map);
+                    
+                    // Show location info
+                    document.getElementById('currentLocation').textContent = result.display_name;
+                    document.getElementById('locationInfo').style.display = 'block';
+                    
+                } else {
+                    alert('위치를 찾을 수 없습니다. 다른 검색어를 시도해보세요.');
+                }
+            } catch (error) {
+                console.error('Geocoding error:', error);
+                alert('위치 검색 중 오류가 발생했습니다.');
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.textContent = '위치 찾기';
+            }
+        };
+        
+        // Update statistics
+        const updateStats = () => {
+            const totalStores = cafeStores.length;
+            const visibleStores = markerGroup.getLayers().length;
+            const citiesCount = new Set(cafeStores.map(store => store.city)).size;
+            
+            document.getElementById('totalStores').textContent = totalStores;
+            document.getElementById('visibleStores').textContent = visibleStores;
+            document.getElementById('citiesCount').textContent = citiesCount;
+        };
+        
+        // Event listeners
+        const setupEventListeners = () => {
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                searchStores(e.target.value);
+            });
+            
+            document.getElementById('locationSearchBtn').addEventListener('click', () => {
+                const locationQuery = document.getElementById('locationInput').value;
+                searchLocation(locationQuery);
+            });
+            
+            document.getElementById('locationInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const locationQuery = e.target.value;
+                    searchLocation(locationQuery);
+                }
+            });
+        };
+        
+        // Initialize the application
+        const init = () => {
+            initMap();
+            setupEventListeners();
+            loadCafeStores();
+        };
+        
+        // Start the application
+        init();
+    </script>
+</body>
+</html>
