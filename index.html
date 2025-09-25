@@ -1,45 +1,53 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>콩카페 매장 위치 지도</title>
-  <link rel="stylesheet" href="leaflet/leaflet.css" crossorigin="" />
-  <style>
-    #map { height: 600px; width: 100%; display: block; }
-  </style>
-</head>
-<body>
-  <h2>콩카페 매장 위치 지도</h2>
-  <div id="map"></div>
+# Create two index files that redirect to the user's GongCafe map versions
 
-  <script src="leaflet/leaflet.js" crossorigin="" defer></script>
-  <script defer>
-    document.addEventListener('DOMContentLoaded', function () {
-      var map = L.map('map').setView([37.56, 126.97], 11);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
-
-      var cafeData = [
-        {"name": "콩카페 연남점", "address": "서울 마포구 성미산로 161-14", "lat": 37.5633, "lng": 126.9235},
-        {"name": "콩카페 이태원점", "address": "서울 용산구 녹사평대로 168-8", "lat": 37.5345, "lng": 126.9941},
-        {"name": "콩카페 종로종각점", "address": "서울 종로구 인사동3길 37", "lat": 37.5700, "lng": 126.9842},
-        {"name": "콩카페 잠실롯데점", "address": "서울 송파구 올림픽로 240, 롯데백화점 B1", "lat": 37.5133, "lng": 127.1021},
-        {"name": "콩카페 신도림점", "address": "서울 구로구 경인로 662, 디큐브시티 B2", "lat": 37.5082, "lng": 126.8910},
-        {"name": "콩카페 삼성점", "address": "서울 강남구 테헤란로 517, 삼성동 B1", "lat": 37.5081, "lng": 127.0631},
-        {"name": "콩카페 현대백화점 판교점", "address": "경기 성남시 분당구 판교역로146번길 20, 현대백화점 B1", "lat": 37.3947, "lng": 127.1119},
-        {"name": "콩카페 고양점 (팝업)", "address": "경기 고양시 덕양구 고양대로 1955, 1층", "lat": 37.6767, "lng": 126.8267},
-        {"name": "콩카페 천안점", "address": "충남 천안시 서북구 불당25로 142 골든프라자 105호,106호", "lat": 36.8040, "lng": 127.1507}
-      ];
-
-      cafeData.forEach(function(cafe) {
-        L.marker([cafe.lat, cafe.lng]).addTo(map)
-          .bindPopup('<b>' + cafe.name + '</b><br />' + cafe.address);
-      });
-    });
-  </script>
-</body>
+external_index = """<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Redirect → gongcafe-map-external.html</title>
+    <meta http-equiv="refresh" content="0; url=gongcafe-map-external.html">
+    <link rel="canonical" href="gongcafe-map-external.html">
+    <style>
+      body {font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 40px;}
+      a {text-decoration: none;}
+      .hint{margin-top:16px; padding:12px; border-left:4px solid #8B4513; background:#fff7ef}
+      code{background:#f5f5f5; padding:2px 6px; border-radius:6px}
+    </style>
+  </head>
+  <body>
+    <h1>Загрузка карты (external)…</h1>
+    <p>Если перенаправление не сработало, <a href="gongcafe-map-external.html">нажмите здесь</a>.</p>
+    <div class="hint">
+      <strong>Важно:</strong> эта версия загружает данные из файла <code>gongcafe-stores.json</code>. 
+      Убедитесь, что <code>gongcafe-stores.json</code> лежит в том же каталоге репозитория GitHub.
+    </div>
+  </body>
 </html>
+"""
+
+enhanced_index = """<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Redirect → gongcafe-map-enhanced.html</title>
+    <meta http-equiv="refresh" content="0; url=gongcafe-map-enhanced.html">
+    <link rel="canonical" href="gongcafe-map-enhanced.html">
+    <style>
+      body {font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; padding: 40px;}
+      a {text-decoration: none;}
+    </style>
+  </head>
+  <body>
+    <h1>Загрузка карты (enhanced)…</h1>
+    <p>Если перенаправление не сработало, <a href="gongcafe-map-enhanced.html">нажмите здесь</a>.</p>
+  </body>
+</html>
+"""
+
+with open("/mnt/data/index-gongcafe-external.html", "w", encoding="utf-8") as f:
+    f.write(external_index)
+
+with open("/mnt/data/index-gongcafe-enhanced.html", "w", encoding="utf-8") as f:
+    f.write(enhanced_index)
+
+"/mnt/data/index-gongcafe-external.html and /mnt/data/index-gongcafe-enhanced.html created"
