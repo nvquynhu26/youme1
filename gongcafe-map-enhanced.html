@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>콩카페 매장 위치 지도</title>
     
-    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
           crossorigin=""/>
     
-    <!-- Custom CSS -->
     <style>
         body {
             margin: 0;
@@ -208,6 +206,19 @@
             font-weight: bold;
             font-size: 12px;
         }
+
+        .location-marker { /* Thêm CSS cho marker vị trí tìm kiếm */
+            background: #3498db;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
         
         .loading {
             text-align: center;
@@ -340,7 +351,6 @@
         </div>
     </div>
 
-    <!-- Leaflet JavaScript -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
@@ -355,7 +365,7 @@
         
         // Initialize the map
         const initMap = () => {
-            map = L.map('map').setView([37.56, 126.97], 11); // Korea center
+            map = L.map('map').setView([37.5665, 126.9780], 11); // Seoul center
             
             // Add OpenStreetMap tiles
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -379,104 +389,73 @@
         
         // Load cafe stores data
         const loadCafeStores = () => {
-            // Sample data - in real app, load from JSON file
+            // Sửa lỗi cú pháp: Chuyển thành một mảng các đối tượng (store)
+            // Thêm lat/lng và cấu trúc thuộc tính đầy đủ
             cafeStores = [
-    {
-        "city": "서울특별시",
-        "district": "마포구",
-        "name": "연남점",
-        "address": "서울 마포구 성미산로 161-14",
-        "lat": 37.5593, // 예시 위도
-        "lng": 126.9290  // 예시 경도
-    },
-    {
-        "city": "서울특별시",
-        "district": "용산구",
-        "name": "이태원점",
-        "address": "서울 용산구 녹사평대로 168-8",
-        "lat": 37.5350,
-        "lng": 126.9918
-    },
-    {
-        "city": "서울특별시",
-        "district": "강남구",
-        "name": "강남구청역점",
-        "address": "서울 강남구 테헤란로 517 B1",
-        "lat": 37.5143,
-        "lng": 127.0505
-    },
-    {
-        "city": "서울특별시",
-        "district": "종로구",
-        "name": "종로종각점",
-        "address": "서울 종로구 인사동3길 37",
-        "lat": 37.5701,
-        "lng": 126.9850
-    },
-    {
-        "city": "서울특별시",
-        "district": "송파구",
-        "name": "잠실점",
-        "address": "서울 송파구 올림픽로 240, 롯데백화점 잠실점 B1",
-        "lat": 37.5126,
-        "lng": 127.1009
-    },
-    {
-        "city": "서울특별시",
-        "district": "구로구",
-        "name": "신도림점",
-        "address": "서울 구로구 경인로 662, 현대백화점 신도림점 B2",
-        "lat": 37.5085,
-        "lng": 126.8913
-    },
-    {
-        "city": "서울특별시",
-        "district": "광진구",
-        "name": "건대점",
-        "address": "주소 확인 필요 (임시 주소)",
-        "lat": 37.5401,
-        "lng": 127.0700
-    },
-    {
-        "city": "경기도",
-        "district": "성남시",
-        "name": "현대백화점 판교점",
-        "address": "성남시 분당구 판교역로146번길 20, 현대백화점 판교점",
-        "lat": 37.3916,
-        "lng": 127.1118
-    },
-    {
-        "city": "경기도",
-        "district": "하남시",
-        "name": "미사호수공원점",
-        "address": "경기 하남시 미사강변중앙로 181 116호, 117호",
-        "lat": 37.5649,
-        "lng": 127.2345
-    },
-    {
-        "city": "경기도",
-        "district": "수원시",
-        "name": "수원점",
-        "address": "경기 수원시 팔달구 화서문로42번길 16 1~2층",
-        "lat": 37.2844,
-        "lng": 127.0125
-    },
-    {
-        "city": "강원도",
-        "district": "속초시",
-        "name": "속초점",
-        "address": "정확한 주소는 공식 SNS 참고 (임시 주소)",
-        "lat": 38.2000,
-        "lng": 128.5900
-    },
-    {
-        "city": "서울특별시",
-        "district": "중구",
-        "name": "콩카페 본사",
-        "address": "서울특별시 중구 퇴계로 324, 8층 (광희동2가, 성우빌딩)",
-        "lat": 37.5615,
-        "lng": 127.0050
-    }
+                {
+                    "city": "서울특별시",
+                    "district": "마포구",
+                    "name": "연남점",
+                    "address": "서울 마포구 성미산로 161-14",
+                    "lat": 37.5620,
+                    "lng": 126.9248
+                },
+                {
+                    "city": "서울특별시",
+                    "district": "용산구",
+                    "name": "이태원점",
+                    "address": "서울 용산구 녹사평대로 168-8",
+                    "lat": 37.5350,
+                    "lng": 126.9930
+                },
+                {
+                    "city": "서울특별시",
+                    "district": "강남구",
+                    "name": "강남구청역점",
+                    "address": "서울 강남구 테헤란로 517 B1",
+                    "lat": 37.5186,
+                    "lng": 127.0427
+                },
+                {
+                    "city": "서울특별시",
+                    "district": "종로구",
+                    "name": "종로종각점",
+                    "address": "서울 종로구 인사동3길 37",
+                    "lat": 37.5714,
+                    "lng": 126.9850
+                },
+                {
+                    "city": "경기도",
+                    "district": "성남시",
+                    "name": "현대백화점 판교점",
+                    "address": "성남시 분당구 판교역로146번길 20",
+                    "lat": 37.3942,
+                    "lng": 127.1118
+                },
+                {
+                    "city": "경기도",
+                    "district": "하남시",
+                    "name": "미사호수공원점",
+                    "address": "경기 하남시 미사강변중앙로 181 116호, 117호",
+                    "lat": 37.5619,
+                    "lng": 127.2415
+                },
+                {
+                    "city": "부산광역시",
+                    "district": "부산진구",
+                    "name": "서면점",
+                    "address": "부산 부산진구 동천로 56",
+                    "lat": 35.1550,
+                    "lng": 129.0592
+                },
+                {
+                    "city": "제주특별자치도",
+                    "district": "제주시",
+                    "name": "제주 함덕점",
+                    "address": "제주 제주시 조천읍 조함해안로 508",
+                    "lat": 33.5410,
+                    "lng": 126.6660
+                }
             ];
             
             // Hide loading message
@@ -498,7 +477,7 @@
             updateStats();
             
             // Fit map to show all markers
-            if (cafeStores.length > 0) {
+            if (markerGroup.getLayers().length > 0) {
                 const group = new L.featureGroup(markerGroup.getLayers());
                 map.fitBounds(group.getBounds().pad(0.1));
             }
@@ -509,29 +488,37 @@
             markerGroup.clearLayers();
             
             cafeStores.forEach(store => {
-                const marker = L.marker([store.lat, store.lng], {
-                    icon: createCafeIcon()
-                });
-                
-                // Create popup content
-                const popupContent = `
-                    <div class="popup-content">
-                        <div class="popup-title">${store.name}</div>
-                        <div class="popup-info"><strong>주소:</strong> ${store.address}</div>
-                        <div class="popup-info"><strong>도시:</strong> ${store.city}</div>
-                        <div class="popup-info"><strong>구/군:</strong> ${store.district}</div>
-                    </div>
-                `;
-                
-                marker.bindPopup(popupContent);
-                markerGroup.addLayer(marker);
+                // Kiểm tra lat/lng trước khi tạo marker
+                if (store.lat && store.lng) {
+                    const marker = L.marker([store.lat, store.lng], {
+                        icon: createCafeIcon()
+                    });
+                    
+                    // Create popup content
+                    const popupContent = `
+                        <div class="popup-content">
+                            <div class="popup-title">${store.name}</div>
+                            <div class="popup-info"><strong>주소:</strong> ${store.address}</div>
+                            <div class="popup-info"><strong>도시:</strong> ${store.city}</div>
+                            <div class="popup-info"><strong>구/군:</strong> ${store.district || '-'}</div>
+                        </div>
+                    `;
+                    
+                    marker.bindPopup(popupContent);
+                    markerGroup.addLayer(marker);
+                }
             });
         };
         
         // Populate city filter
         const populateCityFilter = () => {
             const filterContainer = document.getElementById('cityFilter');
-            const cities = [...new Set(cafeStores.map(store => store.city))];
+            
+            // Xóa các nút cũ, giữ lại nút '전체'
+            const existingButtons = filterContainer.querySelectorAll('.city-btn:not([data-city="all"])');
+            existingButtons.forEach(btn => btn.remove());
+
+            const cities = [...new Set(cafeStores.map(store => store.city))].sort();
             
             cities.forEach(city => {
                 const btn = document.createElement('button');
@@ -553,7 +540,7 @@
             });
             document.querySelector(`[data-city="${city}"]`).classList.add('active');
             
-            // Filter markers
+            // Filter and add markers
             markerGroup.clearLayers();
             
             const filteredStores = city === 'all' 
@@ -561,24 +548,35 @@
                 : cafeStores.filter(store => store.city === city);
             
             filteredStores.forEach(store => {
-                const marker = L.marker([store.lat, store.lng], {
-                    icon: createCafeIcon()
-                });
-                
-                const popupContent = `
-                    <div class="popup-content">
-                        <div class="popup-title">${store.name}</div>
-                        <div class="popup-info"><strong>주소:</strong> ${store.address}</div>
-                        <div class="popup-info"><strong>도시:</strong> ${store.city}</div>
-                        <div class="popup-info"><strong>구/군:</strong> ${store.district}</div>
-                    </div>
-                `;
-                
-                marker.bindPopup(popupContent);
-                markerGroup.addLayer(marker);
+                if (store.lat && store.lng) {
+                    const marker = L.marker([store.lat, store.lng], {
+                        icon: createCafeIcon()
+                    });
+                    
+                    const popupContent = `
+                        <div class="popup-content">
+                            <div class="popup-title">${store.name}</div>
+                            <div class="popup-info"><strong>주소:</strong> ${store.address}</div>
+                            <div class="popup-info"><strong>도시:</strong> ${store.city}</div>
+                            <div class="popup-info"><strong>구/군:</strong> ${store.district || '-'}</div>
+                        </div>
+                    `;
+                    
+                    marker.bindPopup(popupContent);
+                    markerGroup.addLayer(marker);
+                }
             });
             
             updateStats();
+
+            // Fit map to filtered markers if any
+            if (markerGroup.getLayers().length > 0) {
+                const group = new L.featureGroup(markerGroup.getLayers());
+                map.fitBounds(group.getBounds().pad(0.1));
+            } else {
+                // If no markers, zoom back to initial view (Seoul)
+                map.setView([37.5665, 126.9780], 11);
+            }
         };
         
         // Search functionality
@@ -589,8 +587,8 @@
             
             const filteredStores = cafeStores.filter(store => {
                 const matchesSearch = store.name.toLowerCase().includes(searchTerm) ||
-                                    store.address.toLowerCase().includes(searchTerm) ||
-                                    store.city.toLowerCase().includes(searchTerm);
+                                     store.address.toLowerCase().includes(searchTerm) ||
+                                     store.city.toLowerCase().includes(searchTerm);
                 
                 const matchesCity = currentFilter === 'all' || store.city === currentFilter;
                 
@@ -598,21 +596,23 @@
             });
             
             filteredStores.forEach(store => {
-                const marker = L.marker([store.lat, store.lng], {
-                    icon: createCafeIcon()
-                });
-                
-                const popupContent = `
-                    <div class="popup-content">
-                        <div class="popup-title">${store.name}</div>
-                        <div class="popup-info"><strong>주소:</strong> ${store.address}</div>
-                        <div class="popup-info"><strong>도시:</strong> ${store.city}</div>
-                        <div class="popup-info"><strong>구/군:</strong> ${store.district}</div>
-                    </div>
-                `;
-                
-                marker.bindPopup(popupContent);
-                markerGroup.addLayer(marker);
+                if (store.lat && store.lng) {
+                    const marker = L.marker([store.lat, store.lng], {
+                        icon: createCafeIcon()
+                    });
+                    
+                    const popupContent = `
+                        <div class="popup-content">
+                            <div class="popup-title">${store.name}</div>
+                            <div class="popup-info"><strong>주소:</strong> ${store.address}</div>
+                            <div class="popup-info"><strong>도시:</strong> ${store.city}</div>
+                            <div class="popup-info"><strong>구/군:</strong> ${store.district || '-'}</div>
+                        </div>
+                    `;
+                    
+                    marker.bindPopup(popupContent);
+                    markerGroup.addLayer(marker);
+                }
             });
             
             updateStats();
@@ -639,20 +639,23 @@
                     // Update map view
                     map.setView([lat, lng], 13);
                     
-                    // Add location marker
+                    // Remove existing location marker
                     if (currentLocation) {
                         map.removeLayer(currentLocation);
                     }
                     
+                    // Add new location marker
                     currentLocation = L.marker([lat, lng], {
                         icon: L.divIcon({
                             className: 'location-marker',
                             html: '📍',
-                            iconSize: [25, 25],
-                            iconAnchor: [12, 12]
+                            iconSize: [35, 35], // Tăng kích thước
+                            iconAnchor: [17, 17]
                         })
                     }).addTo(map);
                     
+                    currentLocation.bindPopup(`<b>검색 위치:</b> ${result.display_name}`).openPopup();
+
                     // Show location info
                     document.getElementById('currentLocation').textContent = result.display_name;
                     document.getElementById('locationInfo').style.display = 'block';
@@ -697,13 +700,16 @@
                     searchLocation(locationQuery);
                 }
             });
+
+            // Add event listener for '전체' button
+            document.querySelector('[data-city="all"]').addEventListener('click', () => filterByCity('all'));
         };
         
         // Initialize the application
         const init = () => {
             initMap();
+            loadCafeStores(); // Load data before setting up listeners that depend on data
             setupEventListeners();
-            loadCafeStores();
         };
         
         // Start the application
